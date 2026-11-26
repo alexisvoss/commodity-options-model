@@ -8,12 +8,12 @@ A production-ready Black-76 option pricing model for Brent crude futures with Gr
 
 ## Features
 
-### 🎯 Core Pricing
+### Core Pricing
 - **Black-76 Model** — Option pricing for Brent crude futures (adapted from Black-Scholes)
 - **Put-Call Parity** — Mathematically consistent pricing for both calls and puts
 - **Input Validation** — Robust error handling for invalid parameters
 
-### 📊 Greeks Calculations
+### Greeks Calculations
 All five Greeks for complete risk management:
 - **Delta (Δ)** — Price sensitivity to spot price movements
 - **Gamma (Γ)** — Convexity/delta acceleration
@@ -21,19 +21,19 @@ All five Greeks for complete risk management:
 - **Theta (Θ)** — Time decay per day
 - **Rho (ρ)** — Interest rate sensitivity
 
-### 📈 Backtesting Engine
+### Backtesting Engine
 - Test pricing models against real historical Brent crude data
 - Identify systematic pricing patterns
 - Performance metrics: Win rate, P&L analysis, drawdown tracking
 - See "Model Validation" section below for details and limitations
 
-### 🛡️ Hedging Strategies
+### Hedging Strategies
 - **Delta-Neutral Hedging** — Calculate exact hedge ratios
 - **Portfolio Greeks** — Aggregate risk across multiple positions
 - **Strategy Analysis** — Long call spreads, protective puts, and more
 - **Risk Recommendations** — Automated hedge sizing
 
-### 📚 Data Management
+### Data Management
 - Load and process historical market data
 - Calculate rolling volatility (30-day, 60-day, etc.)
 - Date-range analysis and data export
@@ -154,10 +154,10 @@ pytest tests/ --cov=src
 ```
 
 **Test Results:**
-- ✅ Black-Scholes pricing: 5 tests passing
-- ✅ Greeks calculations: 11 tests passing
-- ✅ Put-call parity verified
-- ✅ Edge cases and error handling tested
+- Black-Scholes pricing: 5 tests passing
+- Greeks calculations: 11 tests passing
+- Put-call parity verified
+- Edge cases and error handling tested
 
 ## Project Structure
 
@@ -214,7 +214,7 @@ The model was backtested on **$85 strike European call options** with **60-day e
 
 If we had sold calls at our model price and bought them back at intrinsic value at expiration, we would have been profitable 89.4% of the time, with an average gain of $6.25 per contract.
 
-### ⚠️ Critical Limitations
+### Critical Limitations
 
 **This is NOT a validated trading strategy.** Here's why:
 
@@ -244,9 +244,9 @@ If we had sold calls at our model price and bought them back at intrinsic value 
 
 ### What This Means
 
-✅ **The model identifies a systematic pattern:** options priced higher than realised payoffs suggests potential mispricings.
+**The model identifies a systematic pattern:** options priced higher than realised payoffs suggests potential mispricings.
 
-❌ **This is NOT proof of profitability.** It's a signal worth exploring, but requires real broker data, transaction cost modelling, and proper risk management before trading.
+**This is NOT proof of profitability.** It's a signal worth exploring, but requires real broker data, transaction cost modelling, and proper risk management before trading.
 
 ### Next Steps
 
@@ -375,11 +375,3 @@ This project showcases:
 This is an **educational project** for learning derivatives pricing. 
 
 **Do not use for actual trading** without thorough validation, real broker data integration, transaction cost modelling, and proper risk management. Market data, pricing models, and backtests all have limitations.
-
-## Questions?
-
-Open an issue on GitHub or email: voss.alexis@gmail.com
-
----
-
-**Built with ❤️ in Python | Fully tested | Production-ready codebase | Educational focus**
