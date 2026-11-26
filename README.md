@@ -1,6 +1,6 @@
 # Commodity Options Pricing Model
 
-A production-ready Black-Scholes European option pricing model for Brent crude futures with Greeks calculations, backtesting framework, and hedging strategies. Built with Python, tested on real market data with 89%+ accuracy.
+A production-ready Black-76 option pricing model for Brent crude futures with Greeks calculations, backtesting framework, and hedging strategies. Built with Python and tested against real market data.
 
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -9,7 +9,7 @@ A production-ready Black-Scholes European option pricing model for Brent crude f
 ## Features
 
 ### 🎯 Core Pricing
-- **Black-Scholes Model** — Accurate European option pricing for Brent crude futures
+- **Black-76 Model** — Option pricing for Brent crude futures (adapted from Black-Scholes)
 - **Put-Call Parity** — Mathematically consistent pricing for both calls and puts
 - **Input Validation** — Robust error handling for invalid parameters
 
@@ -22,10 +22,10 @@ All five Greeks for complete risk management:
 - **Rho (ρ)** — Interest rate sensitivity
 
 ### 📈 Backtesting Engine
-- Test pricing models against 500+ days of real Brent crude data
-- 89.4% accuracy on historical data
-- Sharpe Ratio: 3.52 (excellent risk-adjusted returns)
+- Test pricing models against real historical Brent crude data
+- Identify systematic pricing patterns
 - Performance metrics: Win rate, P&L analysis, drawdown tracking
+- See "Model Validation" section below for details and limitations
 
 ### 🛡️ Hedging Strategies
 - **Delta-Neutral Hedging** — Calculate exact hedge ratios
@@ -48,7 +48,7 @@ All five Greeks for complete risk management:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/commodity-options-model.git
+git clone https://github.com/alexisvoss/commodity-options-model.git
 cd commodity-options-model
 
 # 2. Create virtual environment
@@ -106,7 +106,6 @@ results = backtester.backtest_european_call(
 # Get performance metrics
 metrics = backtester.get_performance_metrics()
 print(f"Win Rate: {metrics['win_rate']*100:.1f}%")
-print(f"Sharpe Ratio: {metrics['sharpe_ratio']:.2f}")
 print(f"Total P&L: ${metrics['total_pl']:.2f}")
 ```
 
@@ -161,47 +160,122 @@ pytest tests/ --cov=src
 - ✅ Edge cases and error handling tested
 
 ## Project Structure
+
+```
 commodity-options-model/
 ├── src/
-│ ├── init.py
-│ ├── black_scholes.py # Core Black-Scholes implementation
-│ ├── greeks.py # Greeks calculations (Δ, Γ, ν, Θ, ρ)
-│ ├── data_handler.py # Historical data loading & processing
-│ ├── backtester.py # Backtesting engine
-│ └── hedging.py # Hedging strategies & portfolio Greeks
+│   ├── __init__.py
+│   ├── black_scholes.py      # Core Black-Scholes implementation
+│   ├── greeks.py             # Greeks calculations (Δ, Γ, ν, Θ, ρ)
+│   ├── data_handler.py       # Historical data loading & processing
+│   ├── backtester.py         # Backtesting engine
+│   └── hedging.py            # Hedging strategies & portfolio Greeks
 ├── tests/
-│ ├── init.py
-│ ├── test_black_scholes.py # Pricing model tests
-│ └── test_greeks.py # Greeks validation tests
+│   ├── __init__.py
+│   ├── test_black_scholes.py # Pricing model tests
+│   └── test_greeks.py        # Greeks validation tests
 ├── examples/
-│ ├── basic_pricing.py # Quick pricing example
-│ ├── data_handler_example.py
-│ ├── backtest_example.py # Backtesting walkthrough
-│ └── hedging_example.py # Hedging strategies demo
+│   ├── basic_pricing.py      # Quick pricing example
+│   ├── data_handler_example.py
+│   ├── backtest_example.py   # Backtesting walkthrough
+│   └── hedging_example.py    # Hedging strategies demo
 ├── data/
-│ └── brent_sample.csv # Sample historical data (502 days)
+│   └── brent_sample.csv      # Sample historical data (502 days)
 ├── requirements.txt
-├── README.md (this file)
+├── README.md                 # This file
 ├── USAGE.md
 ├── LICENSE
 └── .gitignore
+```
+
+## Model Validation & Backtesting
+
+### What Was Tested
+
+The model was backtested on **$85 strike European call options** with **60-day expiry** across **339 historical trading days** (Jan 2022 - Dec 2023) of Brent crude futures data.
+
+**Methodology:** For each historical date, we priced a call option using our Black-76 model, then fast-forwarded 60 days to see what the option was actually worth at expiration. We calculated profit/loss as the difference between our model price and the realised intrinsic value.
+
+### Results
+
+| Metric | Value |
+|--------|-------|
+| Total Trades | 339 |
+| Winning Trades | 303 (89.4%) |
+| Losing Trades | 36 (10.6%) |
+| Total P&L | $2,118.64 |
+| Average P&L/Trade | $6.25 |
+| Sharpe Ratio | 3.52 |
+| Max Drawdown | -$151.90 |
+
+### Key Finding
+
+**Model premiums were systematically above realised payoffs.**
+
+If we had sold calls at our model price and bought them back at intrinsic value at expiration, we would have been profitable 89.4% of the time, with an average gain of $6.25 per contract.
+
+### ⚠️ Critical Limitations
+
+**This is NOT a validated trading strategy.** Here's why:
+
+**1. No Real Market Prices**
+- Backtest compares model prices to intrinsic values only
+- No bid-ask spreads, liquidity constraints, or actual fill prices
+- No one would actually trade at these theoretical prices in reality
+
+**2. No Transaction Costs**
+- Doesn't account for commissions, slippage, or market impact
+- Real trading costs would significantly reduce (or eliminate) P&L
+
+**3. Limited Scope**
+- Single strike only ($85) — not optimised across other strikes
+- 60-day expiry only — different expirations may behave differently
+- Assumes constant volatility (doesn't model volatility smile/skew)
+
+**4. Data Limitations**
+- Uses daily closing prices only (no intraday data)
+- No consideration of overnight gaps or liquidity events
+- 2022-2023 timeframe only (may not generalise to other periods)
+
+**5. Backtest Risks**
+- High win rate can indicate look-ahead bias or overfitting
+- Short-volatility strategies are known for high Sharpe ratios right up until they blow up
+- Results may not persist in live trading
+
+### What This Means
+
+✅ **The model identifies a systematic pattern:** options priced higher than realised payoffs suggests potential mispricings.
+
+❌ **This is NOT proof of profitability.** It's a signal worth exploring, but requires real broker data, transaction cost modelling, and proper risk management before trading.
+
+### Next Steps
+
+To validate this finding for real trading:
+
+1. **Integrate broker data** (bid-ask spreads, real quotes)
+2. **Optimise across strikes** (which strikes are most profitable?)
+3. **Model transaction costs** (commissions, slippage, market impact)
+4. **Risk management** (position sizing, portfolio Greeks, hedging)
+5. **Out-of-sample testing** (validate on more recent data)
 
 ## How It Works
 
-### 1. Black-Scholes Pricing
+### 1. Black-Scholes/Black-76 Pricing
 
-The model prices European options using the famous Black-Scholes formula:
-C = SN(d1) - Ke^(-rT)N(d2)
-P = Ke^(-rT)N(-d2) - SN(-d1)
+The model prices European options using the Black-Scholes framework:
+
+```
+C = S*N(d1) - K*e^(-rT)*N(d2)
+P = K*e^(-rT)*N(-d2) - S*N(-d1)
 
 Where:
-
 S = Spot price
-K = Strike price
+K = Strike price  
 T = Time to expiration
 r = Risk-free rate
 σ = Volatility
 N(d) = Cumulative normal distribution
+```
 
 ### 2. Greeks for Risk Management
 
@@ -215,48 +289,39 @@ N(d) = Cumulative normal distribution
 
 ### 3. Backtesting Methodology
 
-- For each date in history, price an option using Black-Scholes
-- Simulate holding it for N days
-- Compare model price to actual intrinsic value at expiry
-- Calculate profit/loss as: Model Price - Realized Payoff
-- Aggregate metrics: win rate, Sharpe ratio, max drawdown
+The backtester compares model prices to realised values:
 
-**Results on Real Data:**
-- 339 trades tested (60-day call options)
-- 89.4% winning trades
-- Sharpe Ratio: 3.52 (excellent)
-- Total P&L: +$2,118.64
+1. Load historical Brent data (502 trading days)
+2. For each trading day, price an option using Black-Scholes
+3. Fast-forward to expiration (e.g., 60 days)
+4. Calculate intrinsic value at expiration
+5. Compute P&L: Model Price - Realised Payoff
+6. Repeat for all valid dates
+7. Aggregate performance metrics
 
-## Performance Characteristics
-
-| Metric | Value | Interpretation |
-|--------|-------|-----------------|
-| Win Rate | 89.4% | Model correct 9/10 times |
-| Sharpe Ratio | 3.52 | Excellent risk-adjusted returns |
-| Sample Size | 339 trades | Statistically significant |
-| Backtesting Period | 2022-2023 | Included volatile Ukraine crisis |
+**Important:** This tests whether the model's prices make sense historically, not whether a trading strategy is profitable.
 
 ## Use Cases
 
 ### Traders
-- Price options more accurately than competitors
-- Manage portfolio Greeks
-- Understand risk exposure
+- Understand option pricing mechanics
+- Calculate portfolio Greeks
+- Explore potential mispricings
 
 ### Risk Managers
 - Calculate hedge ratios
-- Monitor delta-neutral positions
-- Track volatility exposure
+- Monitor delta exposure
+- Track volatility sensitivity
 
 ### Quantitative Analysts
-- Validate pricing models
-- Develop trading strategies
-- Backtest ideas against real data
+- Learn backtesting methodology
+- Validate pricing assumptions
+- Develop trading ideas
 
 ### Educators
 - Learn Black-Scholes from working code
 - Understand Greeks in practice
-- See backtesting methodology
+- See backtesting best practices
 
 ## API Reference
 
@@ -288,31 +353,33 @@ This project is licensed under the MIT License — see [LICENSE](LICENSE) file.
 
 **References & Theory**:
 - Black-Scholes model: Fischer Black, Myron Scholes (1973)
+- Black-76 (Black's model): Fischer Black (1976)
 - Greeks calculation: Hull, "Options, Futures, and Other Derivatives"
 - Backtesting methodology: Standard quantitative finance practices
 - Historical data: Yahoo Finance (Brent crude futures)
 
 ## Author & Contribution
 
-**Built by**: Alexis Voss with Claude (AI Assistant)
-**Project Purpose**: Educational derivatives pricing model for learning and portfolio demonstration
-**Development Period**: [September 2026]
+**Built by**: Alexis Voss with Claude (AI Assistant)  
+**Project Purpose**: Educational derivatives pricing model for learning and portfolio demonstration  
+**Development Period**: September 2026
 
 This project showcases:
-- Full-stack Python financial modeling
+- Full-stack Python financial modelling
 - Test-driven development (16 tests, 100% passing)
 - Professional documentation
-- Real-world backtesting (89.4% accuracy on historical data)
+- Realistic backtesting with clear limitations
 
 ## Disclaimer
 
-This is an educational project for learning derivatives pricing. It should not be used for actual trading without thorough validation and risk management. Market data and models have limitations.
+This is an **educational project** for learning derivatives pricing. 
+
+**Do not use for actual trading** without thorough validation, real broker data integration, transaction cost modelling, and proper risk management. Market data, pricing models, and backtests all have limitations.
 
 ## Questions?
 
-Open an issue on GitHub or email: alexis@a-voss.be
+Open an issue on GitHub or email: voss.alexis@gmail.com
 
 ---
 
-**Built with ❤️ in Python | Ready for production | Fully tested**
-
+**Built with ❤️ in Python | Fully tested | Production-ready codebase | Educational focus**
