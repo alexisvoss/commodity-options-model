@@ -343,3 +343,5 @@ To extend this model:
 5. **Real-time Trading** — Connect to a broker API for live pricing
 
 ---
+
+**Built with learning first, honesty always.**
